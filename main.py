@@ -182,8 +182,8 @@ def Score(lines, testLines):
 
 def Filter(showImage, lines, crossPoint):
     lines = Trans(lines)
-    cv2.line(showImage, (0, crossPoint.y),
-             (639, crossPoint.y), (0, 255, 255), 5)
+    # cv2.line(showImage, (0, crossPoint.y),
+    #          (639, crossPoint.y), (0, 255, 255), 5)
     for line in lines:
         centerPoint = Point(int((line.p1.x + line.p2.x) / 2),
                             int((line.p1.y + line.p2.y) / 2))
@@ -200,16 +200,16 @@ def Filter(showImage, lines, crossPoint):
     testLines = []
     for i in range(len(thetas)):
         testLines.append(Line(crossPoint, Point(x[i], y[i]), 1))
-        cv2.line(showImage, (crossPoint.x, crossPoint.y),
-                 (int(x[i]), int(y[i])), (0, 255, 0), 1)
+        # cv2.line(showImage, (crossPoint.x, crossPoint.y),
+        #          (int(x[i]), int(y[i])), (0, 255, 0), 1)
     lines = Score(lines, testLines)
     ansLine = []
     for line in lines:
         if line.inArc and line.count > 5:
             ansLine.append(line)
-    for line in ansLine:
-        cv2.line(showImage, (line.p1.x, line.p1.y),
-                 (line.p2.x, line.p2.y), (255, 0, 255), 7)
+    # for line in ansLine:
+    #     cv2.line(showImage, (line.p1.x, line.p1.y),
+    #              (line.p2.x, line.p2.y), (255, 0, 255), 7)
     circleLine = Line(Point(0, crossPoint.y), Point(640, crossPoint.y), 1)
     thetaRight = -1
     thetaLeft = -1
@@ -220,9 +220,72 @@ def Filter(showImage, lines, crossPoint):
     return thetaLeft, thetaRight
 
 
+def Distance2(p0, p1):
+    return (p0.x - p1.x) * (p0.x - p1.x) + (p0.y - p1.y) * (p0.y - p1.y)
+
+
+def GetAverageV(q):
+    x, y = 0, 0
+    for i in range(len(q)):
+        x += q[i].x
+        y += q[i].y
+    x /= len(q)
+    y /= len(q)
+    return Point(x, y)
+
+
+def GetVarV(q):
+    avg = GetAverageV(q)
+    temp = 0
+    for i in range(len(q)):
+        temp += Distance2(q[i], avg)
+    temp /= len(q)
+    return math.sqrt(temp)
+
+
+def Validation(qV, qTheta, qVTemp, crosspoint, qThetaTemp, kv=500, kn=3):
+    if len(qV) is 0:
+        qV.append(crosspoint)
+        qTheta.append(Point(qThetaTemp.x,qThetaTemp.y))
+    else:
+        if Distance2(crosspoint, GetAverageV(qV)) < kv:
+            qV.append(crosspoint)
+            qVTemp = []
+        if qThetaTemp.x != -1 and qThetaTemp.y != -1:
+            if qThetaTemp.x > 130 and qThetaTemp.x < 160 and qThetaTemp.y > 30 and qThetaTemp.y < 55:
+                qTheta.append(Point(qThetaTemp.x, qThetaTemp.y))
+    
+    return qV, qTheta, qVTemp
+
+
+def Update(qV, qTheta, qVTemp, kv=500, kn=3):
+    if len(qVTemp) > kn and GetVarV(qVTemp) < kv:
+        qV = qVTemp
+        qVTemp = []
+    return GetAverageV(qV), GetAverageV(qTheta), qV, qVTemp
+
+
+def DrawAns(img, crossPoint, theta):
+    def getAnotherPoint(cp, t):
+        print ("T = ", t)
+        y = 360 - cp.x
+        c = y / math.sin(t * math.pi / 180)
+        x = math.sqrt(c * c - y * y)
+        if t > 90:
+            return int(cp.x - x)
+        else:
+            return int(cp.x + x)
+    cv2.circle(img, (int(crosspoint.x), int(crosspoint.y)), 10, (255, 102, 255), -1)
+    cv2.line(img, (int(crosspoint.x), int(crosspoint.y)), (getAnotherPoint(crossPoint, theta.x), 360), (255,255,105))
+    cv2.line(img, (int(crosspoint.x), int(crosspoint.y)), (getAnotherPoint(crossPoint, theta.y), 360), (255,255,105))
+    return img
+
+
 if(__name__ == "__main__"):
     cap = cv2.VideoCapture('test.mp4')
-    while(1):
+    qV, qTheta, qVTemp = [], [], []
+    # while(1):
+    for i in range(200):
         print('=======================================================')
         ret, img = cap.read()
         if(ret == False):
@@ -247,5 +310,10 @@ if(__name__ == "__main__"):
         crosspoint = Point(crosspoint[0], crosspoint[1])
         print('Detect spend time', time.time() - totalTime)
         thetaLeft, thetaRight = Filter(showImage, lsdLines, crosspoint)
+
+        qV, qTheta, qVTemp = Validation(qV, qTheta, qVTemp, crosspoint, Point(thetaLeft, thetaRight))
+        crosspoint, theta, qV, qVTemp = Update(qV, qTheta, qVTemp)
+        
+        showImage = DrawAns(showImage, crosspoint, theta)
         cv2.imshow('showImage', showImage)
         cv2.waitKey(1)
