@@ -153,7 +153,7 @@ def GetAngle(lineA, lineB):
 
 
 def FilterInArc(startAngle, endAngle, crossPoint, lines):
-    circleLine = Line(Point(0, crossPoint.y), Point(640, crossPoint.y), 1)
+    circleLine = Line(Point(0, crossPoint.y), Point(cols, crossPoint.y), 1)
     for line in lines:
         tmpAngle = GetAngle(line, circleLine)
         if tmpAngle > startAngle and tmpAngle < endAngle:
@@ -194,8 +194,8 @@ def Filter(showImage, lines, crossPoint):
     endAngle = 160
     thetas = np.arange(np.pi * startAngle / 180,
                        np.pi * endAngle / 180, 0.05)
-    x = crossPoint.x + 320 * np.cos(thetas)
-    y = crossPoint.y + 320 * np.sin(thetas)
+    x = crossPoint.x + (cols / 2) * np.cos(thetas)
+    y = crossPoint.y + (cols / 2) * np.sin(thetas)
     lines = FilterInArc(startAngle, endAngle, crossPoint, lines)
     testLines = []
     for i in range(len(thetas)):
@@ -210,7 +210,7 @@ def Filter(showImage, lines, crossPoint):
     # for line in ansLine:
     #     cv2.line(showImage, (line.p1.x, line.p1.y),
     #              (line.p2.x, line.p2.y), (255, 0, 255), 7)
-    circleLine = Line(Point(0, crossPoint.y), Point(640, crossPoint.y), 1)
+    circleLine = Line(Point(0, crossPoint.y), Point(cols, crossPoint.y), 1)
     thetaRight = -1
     thetaLeft = -1
     if(len(ansLine) >= 1):
@@ -268,7 +268,7 @@ def Update(qV, qTheta, qVTemp, kv=500, kn=3):
 def DrawAns(img, crossPoint, theta):
     def getAnotherPoint(cp, t):
         print ("T = ", t)
-        y = 360 - cp.y
+        y = rows - cp.y
         c = y / math.sin(t * math.pi / 180)
         x = math.sqrt(c * c - y * y)
         if t > 90:
@@ -276,8 +276,8 @@ def DrawAns(img, crossPoint, theta):
         else:
             return int(cp.x + x)
     cv2.circle(img, (int(crosspoint.x), int(crosspoint.y)), 10, (255, 102, 255), -1)
-    cv2.line(img, (int(crosspoint.x), int(crosspoint.y)), (getAnotherPoint(crossPoint, theta.x), 360), (255,255,105))
-    cv2.line(img, (int(crosspoint.x), int(crosspoint.y)), (getAnotherPoint(crossPoint, theta.y), 360), (255,255,105))
+    cv2.line(img, (int(crosspoint.x), int(crosspoint.y)), (getAnotherPoint(crossPoint, theta.x), rows), (255,255,105))
+    cv2.line(img, (int(crosspoint.x), int(crosspoint.y)), (getAnotherPoint(crossPoint, theta.y), rows), (255,255,105))
     return img
 
 
