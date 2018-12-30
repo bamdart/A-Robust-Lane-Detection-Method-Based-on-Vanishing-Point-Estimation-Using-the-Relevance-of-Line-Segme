@@ -232,32 +232,36 @@ def Distance2(p0, p1):
     return (p0.x - p1.x) * (p0.x - p1.x) + (p0.y - p1.y) * (p0.y - p1.y)
 
 
-def GetAverageV(q):
+def GetAverageV(q, n=-1):
+    if n is - 1 or n > len(q):
+        n = len(q)
     x, y = 0, 0
-    for i in range(len(q)):
-        x += q[i].x
-        y += q[i].y
-    x /= len(q)
-    y /= len(q)
+    for i in range(n):
+        x += q[len(q) - i - 1].x
+        y += q[len(q) - i - 1].y
+    x /= n
+    y /= n
     return Point(x, y)
 
 
-def GetVarV(q):
-    avg = GetAverageV(q)
+def GetVarV(q, n = -1):
+    if n is - 1 or n > len(q):
+        n = len(q)
+    avg = GetAverageV(q, n)
     temp = 0
-    for i in range(len(q)):
-        temp += Distance2(q[i], avg)
-    temp /= len(q)
+    for i in range(n):
+        temp += Distance2(q[len(q) - i - 1], avg)
+    temp /= n
     return math.sqrt(temp)
 
 
-def Validation(qV, qVTemp, qThetaLeft, qThetaRight, crosspoint, qThetaTemp, kv=500, kn=3):
+def Validation(qV, qVTemp, qThetaLeft, qThetaRight, crosspoint, qThetaTemp, kv=500, kn=30):
     if len(qV) is 0:
         qV.append(crosspoint)
         qThetaLeft.append(qThetaTemp.x)
         qThetaRight.append(qThetaTemp.y)
     else:
-        if Distance2(crosspoint, GetAverageV(qV)) < kv:
+        if Distance2(crosspoint, GetAverageV(qV, kn)) < kv:
             qV.append(crosspoint)
             qVTemp = []
         if qThetaTemp.x != -1:
@@ -271,7 +275,7 @@ def Validation(qV, qVTemp, qThetaLeft, qThetaRight, crosspoint, qThetaTemp, kv=5
 
 
 
-def Update(qV, qVTemp, qThetaLeft, qThetaRight, kv=500, kn=3):
+def Update(qV, qVTemp, qThetaLeft, qThetaRight, kv=500, kn=30):
     
     def GetAvg(q, n = -1):
         if n is - 1 or n > len(q):
@@ -282,11 +286,11 @@ def Update(qV, qVTemp, qThetaLeft, qThetaRight, kv=500, kn=3):
         ans /= n
         return ans
     
-    if len(qVTemp) > kn and GetVarV(qVTemp) < kv:
+    if len(qVTemp) > kn and GetVarV(qVTemp, kn) < kv:
         qV = qVTemp
         qVTemp = []
     
-    return GetAverageV(qV), Point(GetAvg(qThetaLeft, kn), GetAvg(qThetaRight, kn)), qV, qVTemp
+    return GetAverageV(qV, kn), Point(GetAvg(qThetaLeft, kn), GetAvg(qThetaRight, kn)), qV, qVTemp
 
 
 def DrawAns(img, crossPoint, theta):
