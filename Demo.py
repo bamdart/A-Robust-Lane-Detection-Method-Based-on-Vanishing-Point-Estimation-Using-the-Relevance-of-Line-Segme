@@ -255,15 +255,17 @@ def GetVarV(q, n = -1):
     return math.sqrt(temp)
 
 
-def Validation(qV, qVTemp, qThetaLeft, qThetaRight, crosspoint, qThetaTemp, kv=500, kn=30):
+def Validation(qV, qVTemp, qThetaLeft, qThetaRight, crosspoint, qThetaTemp, kv=5, kn=3):
     if len(qV) is 0:
         qV.append(crosspoint)
         qThetaLeft.append(qThetaTemp.x)
         qThetaRight.append(qThetaTemp.y)
     else:
-        if Distance2(crosspoint, GetAverageV(qV, kn)) < kv:
+        if Distance2(crosspoint, GetAverageV(qV)) < kv:
             qV.append(crosspoint)
             qVTemp = []
+        else:
+            qVTemp.append(crosspoint)
         if qThetaTemp.x != -1:
             if qThetaTemp.x > 125 and qThetaTemp.x < 150:
                 qThetaLeft.append(qThetaTemp.x)
@@ -275,7 +277,7 @@ def Validation(qV, qVTemp, qThetaLeft, qThetaRight, crosspoint, qThetaTemp, kv=5
 
 
 
-def Update(qV, qVTemp, qThetaLeft, qThetaRight, kv=500, kn=30):
+def Update(qV, qVTemp, qThetaLeft, qThetaRight, kv=5, kn=3):
     
     def GetAvg(q, n = -1):
         if n is - 1 or n > len(q):
@@ -286,7 +288,7 @@ def Update(qV, qVTemp, qThetaLeft, qThetaRight, kv=500, kn=30):
         ans /= n
         return ans
     
-    if len(qVTemp) > kn and GetVarV(qVTemp, kn) < kv:
+    if len(qVTemp) > kn and GetVarV(qVTemp) < kv:
         qV = qVTemp
         qVTemp = []
     
