@@ -268,7 +268,7 @@ def Update(qV, qTheta, qVTemp, kv=500, kn=3):
 def DrawAns(img, crossPoint, theta):
     def getAnotherPoint(cp, t):
         print ("T = ", t)
-        y = 360 - cp.x
+        y = 360 - cp.y
         c = y / math.sin(t * math.pi / 180)
         x = math.sqrt(c * c - y * y)
         if t > 90:
