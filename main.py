@@ -331,7 +331,7 @@ if(__name__ == "__main__"):
         #       s, " ,location(x,y,strength) :", crosspoint)
         crosspoint = Point(crosspoint[0], crosspoint[1])
 
-        thetaLeft, thetaRight = Filter(showImage, lsdLines, crosspoint)q[n - i - 1]
+        thetaLeft, thetaRight = Filter(showImage, lsdLines, crosspoint)
 
         qV, qVTemp, qThetaLeft, qThetaRight = Validation(qV, qVTemp, qThetaLeft, qThetaRight, crosspoint, Point(thetaLeft, thetaRight))
         crosspoint, theta, qV, qVTemp = Update(qV, qVTemp, qThetaLeft, qThetaRight)
