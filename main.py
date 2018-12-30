@@ -298,17 +298,17 @@ if(__name__ == "__main__"):
         totalTime = time.time()
         cv2.imshow('origin', img)
 
-        s = time.time()
+        # s = time.time()
         lsdLines = LSD(showImage, img)
-        print('LSDLines spend time', time.time() -
-              s, " ,line amount :", len(lsdLines))
+        # print('LSDLines spend time', time.time() -
+        #       s, " ,line amount :", len(lsdLines))
 
         s = time.time()
         crosspoint = CalcLineCrossPoint(showImage, lsdLines)
-        print('CalcLineCrossPoint spend time', time.time() -
-              s, " ,location(x,y,strength) :", crosspoint)
+        # print('CalcLineCrossPoint spend time', time.time() -
+        #       s, " ,location(x,y,strength) :", crosspoint)
         crosspoint = Point(crosspoint[0], crosspoint[1])
-        print('Detect spend time', time.time() - totalTime)
+
         thetaLeft, thetaRight = Filter(showImage, lsdLines, crosspoint)
 
         qV, qTheta, qVTemp = Validation(qV, qTheta, qVTemp, crosspoint, Point(thetaLeft, thetaRight))
@@ -316,4 +316,6 @@ if(__name__ == "__main__"):
         
         showImage = DrawAns(showImage, crosspoint, theta)
         cv2.imshow('showImage', showImage)
+        print('fps : ', 1 / (time.time() - totalTime))
+
         cv2.waitKey(1)
