@@ -217,6 +217,12 @@ def Filter(showImage, lines, crossPoint):
         thetaRight = GetAngle(ansLine[0], circleLine)
     if(len(ansLine) >= 2):
         thetaLeft = GetAngle(ansLine[1], circleLine)
+    
+    if (thetaLeft < 90 and thetaLeft != -1) or thetaRight > 90:
+        temp = thetaLeft
+        thetaLeft = thetaRight
+        thetaRight = temp
+
     return thetaLeft, thetaRight
 
 
@@ -243,49 +249,65 @@ def GetVarV(q):
     return math.sqrt(temp)
 
 
-def Validation(qV, qTheta, qVTemp, crosspoint, qThetaTemp, kv=500, kn=3):
+def Validation(qV, qVTemp, qThetaLeft, qThetaRight, crosspoint, qThetaTemp, kv=500, kn=3):
     if len(qV) is 0:
         qV.append(crosspoint)
-        qTheta.append(Point(qThetaTemp.x,qThetaTemp.y))
+        qThetaLeft.append(qThetaTemp.x)
+        qThetaRight.append(qThetaTemp.y)
     else:
         if Distance2(crosspoint, GetAverageV(qV)) < kv:
             qV.append(crosspoint)
             qVTemp = []
-        if qThetaTemp.x != -1 and qThetaTemp.y != -1:
-            if qThetaTemp.x > 130 and qThetaTemp.x < 160 and qThetaTemp.y > 30 and qThetaTemp.y < 55:
-                qTheta.append(Point(qThetaTemp.x, qThetaTemp.y))
+        if qThetaTemp.x != -1:
+            if qThetaTemp.x > 125 and qThetaTemp.x < 150:
+                qThetaLeft.append(qThetaTemp.x)
+        if qThetaTemp.y != -1:
+            if qThetaTemp.y > 30 and qThetaTemp.y < 60:
+                qThetaRight.append(qThetaTemp.y)
     
-    return qV, qTheta, qVTemp
+    return qV, qVTemp, qThetaLeft, qThetaRight
 
 
-def Update(qV, qTheta, qVTemp, kv=500, kn=3):
+def Update(qV, qVTemp, qThetaLeft, qThetaRight, kv=500, kn=3):
+    
+    def GetAvg(q, n = -1):
+        if n is - 1 or n > len(q):
+            n = len(q)
+        ans = 0
+        for i in range(n):
+            ans += q[len(q) - i - 1]
+        ans /= n
+        return ans
+    
     if len(qVTemp) > kn and GetVarV(qVTemp) < kv:
         qV = qVTemp
         qVTemp = []
-    return GetAverageV(qV), GetAverageV(qTheta), qV, qVTemp
+    
+    return GetAverageV(qV), Point(GetAvg(qThetaLeft, kn), GetAvg(qThetaRight, kn)), qV, qVTemp
 
 
 def DrawAns(img, crossPoint, theta):
     def getAnotherPoint(cp, t):
         print ("T = ", t)
-        y = rows - cp.y
-        c = y / math.sin(t * math.pi / 180)
-        x = math.sqrt(c * c - y * y)
+        y = 360 - cp.y
         if t > 90:
+            c = y / math.sin(t * math.pi / 180)
+            x = math.sqrt(c * c - y * y)
             return int(cp.x - x)
         else:
+            x = y / math.tan(t * math.pi / 180)
             return int(cp.x + x)
     cv2.circle(img, (int(crosspoint.x), int(crosspoint.y)), 10, (255, 102, 255), -1)
-    cv2.line(img, (int(crosspoint.x), int(crosspoint.y)), (getAnotherPoint(crossPoint, theta.x), rows), (255,255,105))
-    cv2.line(img, (int(crosspoint.x), int(crosspoint.y)), (getAnotherPoint(crossPoint, theta.y), rows), (255,255,105))
+    cv2.line(img, (int(crosspoint.x), int(crosspoint.y)), (getAnotherPoint(crossPoint, theta.x), 360), (255,255,105))
+    cv2.line(img, (int(crosspoint.x), int(crosspoint.y)), (getAnotherPoint(crossPoint, theta.y), 360), (255,255,105))
     return img
 
 
 if(__name__ == "__main__"):
     cap = cv2.VideoCapture('test.mp4')
-    qV, qTheta, qVTemp = [], [], []
-    # while(1):
-    for i in range(200):
+    qV, qVTemp, qThetaLeft, qThetaRight = [], [], [], []
+    while (1):
+    # for i in range(100):
         print('=======================================================')
         ret, img = cap.read()
         if(ret == False):
@@ -309,10 +331,10 @@ if(__name__ == "__main__"):
         #       s, " ,location(x,y,strength) :", crosspoint)
         crosspoint = Point(crosspoint[0], crosspoint[1])
 
-        thetaLeft, thetaRight = Filter(showImage, lsdLines, crosspoint)
+        thetaLeft, thetaRight = Filter(showImage, lsdLines, crosspoint)q[n - i - 1]
 
-        qV, qTheta, qVTemp = Validation(qV, qTheta, qVTemp, crosspoint, Point(thetaLeft, thetaRight))
-        crosspoint, theta, qV, qVTemp = Update(qV, qTheta, qVTemp)
+        qV, qVTemp, qThetaLeft, qThetaRight = Validation(qV, qVTemp, qThetaLeft, qThetaRight, crosspoint, Point(thetaLeft, thetaRight))
+        crosspoint, theta, qV, qVTemp = Update(qV, qVTemp, qThetaLeft, qThetaRight)
         
         showImage = DrawAns(showImage, crosspoint, theta)
         cv2.imshow('showImage', showImage)
