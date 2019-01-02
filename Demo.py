@@ -11,7 +11,7 @@ LSD_strength_threshold = 6
 DrawCrossPoint = True
 
 # 只需要偵測此區域內的車道線
-top = 270
+top = 280
 bottom = -1
 left = 1
 right = -1
@@ -19,6 +19,12 @@ right = -1
 # Filter 扇型角度
 startAngle = 10
 endAngle = 170
+
+#validation 合格角度
+leftMax = 160
+leftMin = 125
+rightMax = 70
+rightMin = 30
 
 # Create default parametrization LSD
 lsd = cv2.createLineSegmentDetector(0)
@@ -270,10 +276,10 @@ def Validation(qV, qVTemp, qThetaLeft, qThetaRight, crosspoint, qThetaTemp, kv=5
         else:
             qVTemp.append(crosspoint)
         if qThetaTemp.x != -1:
-            if qThetaTemp.x > 125 and qThetaTemp.x < 160:
+            if qThetaTemp.x > leftMin and qThetaTemp.x < leftMax:
                 qThetaLeft.append(qThetaTemp.x)
         if qThetaTemp.y != -1:
-            if qThetaTemp.y > 30 and qThetaTemp.y < 60:
+            if qThetaTemp.y > rightMin and qThetaTemp.y < rightMax:
                 qThetaRight.append(qThetaTemp.y)
 
     return qV, qVTemp, qThetaLeft, qThetaRight
