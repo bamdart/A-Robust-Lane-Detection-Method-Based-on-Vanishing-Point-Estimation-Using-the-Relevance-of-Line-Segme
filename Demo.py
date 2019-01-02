@@ -219,7 +219,7 @@ def Filter(showImage, lines, crossPoint):
         thetaRight = GetAngle(ansLine[0], circleLine)
     if(len(ansLine) >= 2):
         thetaLeft = GetAngle(ansLine[1], circleLine)
-    
+
     if (thetaLeft < 90 and thetaLeft != -1) or thetaRight > 90:
         temp = thetaLeft
         thetaLeft = thetaRight
@@ -244,7 +244,7 @@ def GetAverageV(q, n=-1):
     return Point(x, y)
 
 
-def GetVarV(q, n = -1):
+def GetVarV(q, n=-1):
     if n is - 1 or n > len(q):
         n = len(q)
     avg = GetAverageV(q, n)
@@ -267,19 +267,18 @@ def Validation(qV, qVTemp, qThetaLeft, qThetaRight, crosspoint, qThetaTemp, kv=5
         else:
             qVTemp.append(crosspoint)
         if qThetaTemp.x != -1:
-            if qThetaTemp.x > 125 and qThetaTemp.x < 150:
+            if qThetaTemp.x > 125 and qThetaTemp.x < 160:
                 qThetaLeft.append(qThetaTemp.x)
         if qThetaTemp.y != -1:
             if qThetaTemp.y > 30 and qThetaTemp.y < 60:
                 qThetaRight.append(qThetaTemp.y)
-    
+
     return qV, qVTemp, qThetaLeft, qThetaRight
 
 
-
 def Update(qV, qVTemp, qThetaLeft, qThetaRight, kv=5, kn=3):
-    
-    def GetAvg(q, n = -1):
+
+    def GetAvg(q, n=-1):
         if n is - 1 or n > len(q):
             n = len(q)
         ans = 0
@@ -287,17 +286,17 @@ def Update(qV, qVTemp, qThetaLeft, qThetaRight, kv=5, kn=3):
             ans += q[len(q) - i - 1]
         ans /= n
         return ans
-    
+
     if len(qVTemp) > kn and GetVarV(qVTemp) < kv:
         qV = qVTemp
         qVTemp = []
-    
+
     return GetAverageV(qV, kn), Point(GetAvg(qThetaLeft, kn), GetAvg(qThetaRight, kn)), qV, qVTemp
 
 
 def DrawAns(img, crossPoint, theta):
     def getAnotherPoint(cp, t):
-        print ("T = ", t)
+        print("T = ", t)
         y = 360 - cp.y
         if t > 90:
             c = y / math.sin(t * math.pi / 180)
@@ -306,16 +305,19 @@ def DrawAns(img, crossPoint, theta):
         else:
             x = y / math.tan(t * math.pi / 180)
             return int(cp.x + x)
-    cv2.circle(img, (int(crosspoint.x), int(crosspoint.y)), 10, (255, 102, 255), -1)
-    cv2.line(img, (int(crosspoint.x), int(crosspoint.y)), (getAnotherPoint(crossPoint, theta.x), 360), (255,255,105))
-    cv2.line(img, (int(crosspoint.x), int(crosspoint.y)), (getAnotherPoint(crossPoint, theta.y), 360), (255,255,105))
+    cv2.circle(img, (int(crosspoint.x), int(crosspoint.y)),
+               10, (255, 102, 255), -1)
+    cv2.line(img, (int(crosspoint.x), int(crosspoint.y)),
+             (getAnotherPoint(crossPoint, theta.x), 360), (255, 255, 105))
+    cv2.line(img, (int(crosspoint.x), int(crosspoint.y)),
+             (getAnotherPoint(crossPoint, theta.y), 360), (255, 255, 105))
     return img
 
 
 if(__name__ == "__main__"):
 
     fourcc = cv2.VideoWriter_fourcc(*'XVID')
-    out = cv2.VideoWriter('output.mp4', fourcc, 20.0, (640,360))
+    out = cv2.VideoWriter('output.mp4', fourcc, 20.0, (640, 360))
 
     cap = cv2.VideoCapture('test.mp4')
     qV, qVTemp, qThetaLeft, qThetaRight = [], [], [], []
@@ -336,16 +338,17 @@ if(__name__ == "__main__"):
 
         thetaLeft, thetaRight = Filter(img, lsdLines, crosspoint)
 
-        qV, qVTemp, qThetaLeft, qThetaRight = Validation(qV, qVTemp, qThetaLeft, qThetaRight, crosspoint, Point(thetaLeft, thetaRight))
-        crosspoint, theta, qV, qVTemp = Update(qV, qVTemp, qThetaLeft, qThetaRight)
-        
+        qV, qVTemp, qThetaLeft, qThetaRight = Validation(
+            qV, qVTemp, qThetaLeft, qThetaRight, crosspoint, Point(thetaLeft, thetaRight))
+        crosspoint, theta, qV, qVTemp = Update(
+            qV, qVTemp, qThetaLeft, qThetaRight)
+
         img = DrawAns(img, crosspoint, theta)
         cv2.imshow('showImage', img)
 
         # frame = cv2.flip(img, 2)
         # # write the flipped frame
         out.write(img)
-
 
         print('fps : ', 1 / (time.time() - totalTime))
 
