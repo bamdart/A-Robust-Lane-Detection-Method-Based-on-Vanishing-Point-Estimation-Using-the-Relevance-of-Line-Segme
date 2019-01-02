@@ -12,9 +12,13 @@ DrawCrossPoint = True
 
 # 只需要偵測此區域內的車道線
 top = 270
-bottom = -10
-left = 120
-right = -120
+bottom = -1
+left = 1
+right = -1
+
+# Filter 扇型角度
+startAngle = 10
+endAngle = 170
 
 # Create default parametrization LSD
 lsd = cv2.createLineSegmentDetector(0)
@@ -190,8 +194,7 @@ def Filter(showImage, lines, crossPoint):
         # cv2.circle(
         #     showImage, (centerPoint.x, centerPoint.y), 10, (255, 255, 0), -1)
 
-    startAngle = 33
-    endAngle = 160
+
     thetas = np.arange(np.pi * startAngle / 180,
                        np.pi * endAngle / 180, 0.05)
     x = crossPoint.x + (cols / 2) * np.cos(thetas)
@@ -291,7 +294,7 @@ def Update(qV, qVTemp, qThetaLeft, qThetaRight, kv=5, kn=3):
         qV = qVTemp
         qVTemp = []
 
-    return GetAverageV(qV), Point(GetAvg(qThetaLeft, kn), GetAvg(qThetaRight, kn)), qV, qVTemp
+    return GetAverageV(qV, kn), Point(GetAvg(qThetaLeft, kn), GetAvg(qThetaRight, kn)), qV, qVTemp
 
 
 def DrawAns(img, crossPoint, theta):
@@ -317,11 +320,12 @@ def DrawAns(img, crossPoint, theta):
 if(__name__ == "__main__"):
 
     fourcc = cv2.VideoWriter_fourcc(*'XVID')
-    out = cv2.VideoWriter('output.mp4', fourcc, 20.0, (640, 360))
+    out = cv2.VideoWriter('demonOutput.mp4', fourcc, 20.0, (640, 360))
 
-    cap = cv2.VideoCapture('test.mp4')
+    cap = cv2.VideoCapture('demoInput.mp4')
     qV, qVTemp, qThetaLeft, qThetaRight = [], [], [], []
     while(1):
+    # for i in range(100):
         ret, img = cap.read()
         if(ret == False):
             print('Video Empty')
