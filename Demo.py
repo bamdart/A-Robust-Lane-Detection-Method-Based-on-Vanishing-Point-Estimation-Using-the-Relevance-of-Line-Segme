@@ -81,7 +81,7 @@ def LSD(src):
     if(DrawLSDLine):
         for i in range(len(lines)):
             cv2.line(src, (lines[i][0][0], lines[i][0][1]),
-                     (lines[i][0][2], lines[i][0][3]), (0, 0, 255), 5)
+                     (lines[i][0][2], lines[i][0][3]), (0, 255, 0), 2)
 
     return lines
 
@@ -124,7 +124,7 @@ def CalcLineCrossPoint(showImage, lines):
 
     if(DrawCrossPoint):
         cv2.circle(
-            showImage, (max_strength_point[0], max_strength_point[1]), 10, (255, 0, 0), -1)
+            showImage, (max_strength_point[0], max_strength_point[1]), 8, (204, 204, 51), -1)
 
     return max_strength_point
 
@@ -291,7 +291,7 @@ def Update(qV, qVTemp, qThetaLeft, qThetaRight, kv=5, kn=3):
         qV = qVTemp
         qVTemp = []
 
-    return GetAverageV(qV, kn), Point(GetAvg(qThetaLeft, kn), GetAvg(qThetaRight, kn)), qV, qVTemp
+    return GetAverageV(qV), Point(GetAvg(qThetaLeft, kn), GetAvg(qThetaRight, kn)), qV, qVTemp
 
 
 def DrawAns(img, crossPoint, theta):
@@ -306,11 +306,11 @@ def DrawAns(img, crossPoint, theta):
             x = y / math.tan(t * math.pi / 180)
             return int(cp.x + x)
     cv2.circle(img, (int(crosspoint.x), int(crosspoint.y)),
-               10, (255, 102, 255), -1)
+               10, (0, 0, 255), -1)
     cv2.line(img, (int(crosspoint.x), int(crosspoint.y)),
-             (getAnotherPoint(crossPoint, theta.x), 360), (255, 255, 105))
+             (getAnotherPoint(crossPoint, theta.x), 360), (0, 0, 255), 3)
     cv2.line(img, (int(crosspoint.x), int(crosspoint.y)),
-             (getAnotherPoint(crossPoint, theta.y), 360), (255, 255, 105))
+             (getAnotherPoint(crossPoint, theta.y), 360), (0, 0, 255), 3)
     return img
 
 
